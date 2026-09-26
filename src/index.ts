@@ -1,66 +1,44 @@
 /**
  * AURA - AI Railway Booking Assistant
- * Day 1 Foundation Entrypoint
+ * Day 2 Entrypoint - Rule-Based Parser Demo
  */
 
-import type { BookingRequest } from './models/index.js';
+import { parseBookingRequest } from './parser/index.js';
 
 function printHeader(): void {
   console.log('='.repeat(65));
-  console.log('   AURA - AI Railway Booking Assistant (Day 1 Foundation)');
+  console.log('   AURA - AI Railway Booking Assistant (Day 2 Parser)');
   console.log('='.repeat(65));
 }
 
-function demonstrateDay1Foundation(): void {
+async function demonstrateDay2Parser(): Promise<void> {
   printHeader();
 
-  console.log('\n[Status] Project foundation initialized using TypeScript & Node.js.');
-  console.log('\n[Milestone 1 Objective]');
+  console.log('\n[Status] Rule-based TypeScript parser active.');
+  console.log('\n[Milestone 1 Target]');
   console.log('  Natural-language railway booking request');
-  console.log('  -> structured booking information');
+  console.log('  -> structured booking information\n');
 
-  // Preview of target structured booking schema
-  const sampleBooking: BookingRequest = {
-    sourceStation: 'New Delhi (NDLS)',
-    destinationStation: 'Mumbai Central (MMCT)',
-    travelDate: '2026-10-15',
-    trainNumberOrName: 'Rajdhani Express',
-    travelClass: '3A',
-    quota: 'GENERAL',
-    passengers: [
-      {
-        name: 'Rahul Sharma',
-        age: 30,
-        gender: 'M',
-        berthPreference: 'LOWER',
-      },
-      {
-        name: 'Priya Sharma',
-        age: 28,
-        gender: 'F',
-        berthPreference: 'MIDDLE',
-      },
-    ],
-    rawPrompt:
-      'Book 2 tickets for Rahul (30M) and Priya (28F) in 3A Rajdhani from Delhi to Mumbai on 15th Oct',
-  };
+  const testPrompts = [
+    'Book Tatkal 3AC from Chennai to Bangalore tomorrow for me and my father.',
+    'Book Sleeper ticket from New Delhi to Mumbai today for my mother.',
+    'Book General CC from Kolkata to Patna tomorrow for me and my mother.',
+  ];
 
-  console.log('\n[Preview] Target Structured Booking Data:');
-  console.log(`  Source:      ${sampleBooking.sourceStation}`);
-  console.log(`  Destination: ${sampleBooking.destinationStation}`);
-  console.log(`  Date:        ${sampleBooking.travelDate}`);
-  console.log(`  Train:       ${sampleBooking.trainNumberOrName}`);
-  console.log(`  Class:       ${sampleBooking.travelClass}`);
-  console.log(`  Quota:       ${sampleBooking.quota}`);
-  console.log(`  Passengers (${sampleBooking.passengers.length}):`);
-  sampleBooking.passengers.forEach((p) => {
+  for (const prompt of testPrompts) {
+    console.log(`Prompt: "${prompt}"`);
+    const parsed = await parseBookingRequest(prompt);
+    console.log('Parsed BookingRequest:');
+    console.log(`  Source:      ${parsed.sourceStation}`);
+    console.log(`  Destination: ${parsed.destinationStation}`);
+    console.log(`  Date:        ${parsed.travelDate}`);
+    console.log(`  Class:       ${parsed.travelClass}`);
+    console.log(`  Quota:       ${parsed.quota ?? 'N/A'}`);
     console.log(
-      `    - ${p.name}, Age: ${p.age}, Gender: ${p.gender} (Berth: ${p.berthPreference})`
+      `  Passengers:  [${parsed.passengers.map((p) => `"${p.name}"`).join(', ')}]`
     );
-  });
-
-  console.log('\n[Note] Booking parser is intentionally NOT implemented yet for Day 1.');
-  console.log('='.repeat(65));
+    console.log('-'.repeat(65));
+  }
 }
 
-demonstrateDay1Foundation();
+demonstrateDay2Parser().catch(console.error);

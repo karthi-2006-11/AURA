@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import type { BookingRequest, Passenger } from '../src/models/index.js';
 import { parseBookingRequest } from '../src/parser/index.js';
 
-describe('AURA Day 1 Foundation Verification', () => {
+describe('AURA Foundation Verification', () => {
   it('should instantiate structured passenger and booking objects properly', () => {
     const passenger: Passenger = {
       name: 'Ananya Verma',
@@ -27,15 +27,11 @@ describe('AURA Day 1 Foundation Verification', () => {
     assert.strictEqual(booking.passengers[0].name, 'Ananya Verma');
   });
 
-  it('should confirm that the parser is not implemented yet', async () => {
-    await assert.rejects(
-      async () => {
-        await parseBookingRequest('Book a train ticket');
-      },
-      {
-        name: 'Error',
-        message: /Booking parser is not implemented yet/,
-      }
-    );
+  it('should return a structured BookingRequest from the parser', async () => {
+    const result = await parseBookingRequest('Book 3A from Chennai to Bangalore tomorrow for me');
+    assert.ok(result);
+    assert.strictEqual(result.sourceStation, 'Chennai');
+    assert.strictEqual(result.destinationStation, 'Bangalore');
+    assert.strictEqual(result.travelClass, '3A');
   });
 });
