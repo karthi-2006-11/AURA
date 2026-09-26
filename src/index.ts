@@ -1,44 +1,66 @@
 /**
  * AURA - AI Railway Booking Assistant
- * Day 2 Entrypoint - Rule-Based Parser Demo
+ * Day 4 Entrypoint - Integrated Pipeline Demo
  */
 
-import { parseBookingRequest } from './parser/index.js';
+import { processBookingRequest } from './service/bookingService.js';
 
 function printHeader(): void {
-  console.log('='.repeat(65));
-  console.log('   AURA - AI Railway Booking Assistant (Day 2 Parser)');
-  console.log('='.repeat(65));
+  console.log('='.repeat(70));
+  console.log('   AURA - AI Railway Booking Assistant (Day 4 Integrated Pipeline)');
+  console.log('='.repeat(70));
 }
 
-async function demonstrateDay2Parser(): Promise<void> {
+async function demonstrateDay4Pipeline(): Promise<void> {
   printHeader();
 
-  console.log('\n[Status] Rule-based TypeScript parser active.');
-  console.log('\n[Milestone 1 Target]');
-  console.log('  Natural-language railway booking request');
-  console.log('  -> structured booking information\n');
+  console.log('\n[Pipeline Flow]');
+  console.log('  Natural-language request');
+  console.log('  -> parser (BookingRequest)');
+  console.log('  -> validator (ValidationResult)\n');
 
   const testPrompts = [
+    // 1. Complete and valid request
     'Book Tatkal 3AC from Chennai to Bangalore tomorrow for me and my father.',
-    'Book Sleeper ticket from New Delhi to Mumbai today for my mother.',
-    'Book General CC from Kolkata to Patna tomorrow for me and my mother.',
+
+    // 2. Incomplete request (missing class & passengers)
+    'Train from Delhi to Mumbai tomorrow',
+
+    // 3. Invalid request (identical source and destination)
+    'Book 3A from Delhi to Delhi tomorrow for me',
   ];
 
-  for (const prompt of testPrompts) {
-    console.log(`Prompt: "${prompt}"`);
-    const parsed = await parseBookingRequest(prompt);
+  for (let i = 0; i < testPrompts.length; i++) {
+    const prompt = testPrompts[i];
+    console.log(`[Case ${i + 1}] User Request: "${prompt}"`);
+
+    const { request, validation } = await processBookingRequest(prompt);
+
     console.log('Parsed BookingRequest:');
-    console.log(`  Source:      ${parsed.sourceStation}`);
-    console.log(`  Destination: ${parsed.destinationStation}`);
-    console.log(`  Date:        ${parsed.travelDate}`);
-    console.log(`  Class:       ${parsed.travelClass}`);
-    console.log(`  Quota:       ${parsed.quota ?? 'N/A'}`);
-    console.log(
-      `  Passengers:  [${parsed.passengers.map((p) => `"${p.name}"`).join(', ')}]`
-    );
-    console.log('-'.repeat(65));
+    console.log(`  Source:       ${request.sourceStation ?? '(missing)'}`);
+    console.log(`  Destination:  ${request.destinationStation ?? '(missing)'}`);
+    console.log(`  Date:         ${request.travelDate ?? '(missing)'}`);
+    console.log(`  Class:        ${request.travelClass ?? '(missing)'}`);
+    console.log(`  Quota:        ${request.quota ?? 'N/A'}`);
+    const passengerList =
+      request.passengers.length > 0
+        ? `[${request.passengers.map((p) => `"${p.name}"`).join(', ')}]`
+        : '(none)';
+    console.log(`  Passengers:   ${passengerList}`);
+
+    console.log('Validation Result:');
+    console.log(`  Status:       ${validation.isValid ? 'VALID' : 'INVALID'}`);
+    if (!validation.isValid) {
+      if (validation.missingFields.length > 0) {
+        console.log(`  Missing:      ${validation.missingFields.join(', ')}`);
+      }
+      if (validation.errors.length > 0) {
+        console.log(`  Errors:`);
+        validation.errors.forEach((err) => console.log(`    - ${err}`));
+      }
+    }
+    console.log('-'.repeat(70));
   }
 }
 
-demonstrateDay2Parser().catch(console.error);
+demonstrateDay4Pipeline().catch(console.error);
